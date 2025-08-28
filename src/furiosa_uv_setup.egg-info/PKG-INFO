@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: furiosa-uv-setup
+Version: 0.1.0
+Summary: FuriosaAI 드라이버/펌웨어/PE Runtime 설치를 자동화하는 uv 기반 CLI
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: typer>=0.12
+Requires-Dist: rich>=13.0

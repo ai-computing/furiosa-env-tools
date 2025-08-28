@@ -1,0 +1,27 @@
+[project]
+name = "furiosa-uv-setup"
+version = "0.1.0"
+description = "FuriosaAI 드라이버/펌웨어/PE Runtime 설치를 자동화하는 uv 기반 CLI"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+  "typer>=0.12",
+  "rich>=13.0",
+]
+
+[project.scripts]
+furiosa-setup = "furiosa_env.cli:app"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["furiosa_env*"]
+
+[tool.uv]
+package = true

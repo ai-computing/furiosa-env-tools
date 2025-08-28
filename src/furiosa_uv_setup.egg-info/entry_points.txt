@@ -1,0 +1,2 @@
+[console_scripts]
+furiosa-setup = furiosa_env.cli:app

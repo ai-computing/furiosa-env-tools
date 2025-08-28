@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+src/furiosa_env/__init__.py
+src/furiosa_env/cli.py
+src/furiosa_env/py.typed
+src/furiosa_uv_setup.egg-info/PKG-INFO
+src/furiosa_uv_setup.egg-info/SOURCES.txt
+src/furiosa_uv_setup.egg-info/dependency_links.txt
+src/furiosa_uv_setup.egg-info/entry_points.txt
+src/furiosa_uv_setup.egg-info/requires.txt
+src/furiosa_uv_setup.egg-info/top_level.txt
