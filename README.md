@@ -33,10 +33,11 @@ source ~/.bashrc
 
 # 리포지토리 클론
 git clone https://github.com/<YOUR_ORG>/furiosa-uv-setup.git
-cd furiosa-uv-setup
+cd furiosa-env-tools
 
 # 의존성 동기화
-uv sync
+uv sync --python 3.11
+source .venv/bin/activate
 ```
 
 ### B. pipx 사용
