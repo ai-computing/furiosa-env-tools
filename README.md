@@ -78,6 +78,35 @@ furiosa-setup all
 
 ---
 
+## Llama-3.1-8B 모델 컴파일
+
+FuriosaAI NPU에서 Llama-3.1-8B-Instruct 모델을 실행하기 위한 준비가 완료되었습니다!
+
+### 모델 다운로드
+
+```bash
+# 가상환경 활성화
+export PATH="/root/.local/bin:$PATH"
+source .venv/bin/activate
+
+# 모델 다운로드
+python download_model.py
+```
+
+### 컴파일 준비 및 실행
+
+```bash
+# 모델 구성 확인
+python prepare_compilation.py
+
+# 컴파일 실행 (실제 NPU 하드웨어 필요)
+python compile_for_furiosa.py
+```
+
+📚 **자세한 가이드**: [MODEL_COMPILATION_GUIDE.md](./MODEL_COMPILATION_GUIDE.md)를 참조하세요.
+
+---
+
 ## Troubleshooting
 
 - **명령어가 안 잡힐 때**:  

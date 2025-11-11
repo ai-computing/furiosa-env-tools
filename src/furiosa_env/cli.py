@@ -88,9 +88,8 @@ def setup_apt():
     print("[bold]필수 패키지 설치 및 GPG 키 등록...[/bold]")
     run("apt update && apt install -y curl gnupg", sudo=True)
 
-    # 키 저장 (리다이렉션 대신 파일 복사)
-    run("curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor > /tmp/cloud.google.gpg")
-    run("install -m 644 /tmp/cloud.google.gpg /etc/apt/trusted.gpg.d/cloud.google.gpg", sudo=True)
+    # 키 저장 (직접 최종 위치에 저장)
+    run("curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/cloud.google.gpg > /dev/null")
 
     # 코드네임/아키텍처를 파이썬에서 문자열로 확보
     code = os_codename()  # 예: jammy, bookworm, focal
@@ -114,7 +113,21 @@ def install_prereqs():
     """
     require_root_notice()
     run("apt update", sudo=True)
-    run("apt install -y build-essential linux-modules-extra-$(uname -r) linux-headers-$(uname -r)", sudo=True)
+
+    # WSL2 환경 감지
+    try:
+        with open("/proc/version", "r") as f:
+            proc_version = f.read()
+        is_wsl = "microsoft" in proc_version.lower() or "wsl" in proc_version.lower()
+    except Exception:
+        is_wsl = False
+
+    if is_wsl:
+        print("[yellow]WSL2 환경 감지: 커널 헤더 패키지 설치를 건너뜁니다.[/yellow]")
+        run("apt install -y build-essential", sudo=True)
+    else:
+        run("apt install -y build-essential linux-modules-extra-$(uname -r) linux-headers-$(uname -r)", sudo=True)
+
     print("[bold green]커널 헤더/모듈 등 설치 완료[/bold green]")
 
 @app.command()
@@ -146,9 +159,9 @@ def upgrade_firmware():
     print("[bold green]펌웨어 이미지 설치 완료. 장치별 3~5분 소요될 수 있으며, 재부팅이 필요할 수 있습니다.[/bold green]")
 
 @app.command()
-def all():
+def all(include_llm: bool = typer.Option(True, help="LLM 컴파일러도 함께 설치")):
     """
-    전체 자동 실행(장치 확인 → APT 등록 → 공용의존성 → 드라이버/Runtime 설치 → 검증).
+    전체 자동 실행(장치 확인 → APT 등록 → 공용의존성 → 드라이버/Runtime 설치 → 검증 → LLM 컴파일러).
     """
     require_root_notice()
     check_devices()
@@ -156,6 +169,11 @@ def all():
     install_prereqs()
     install_furiosa()
     verify()
+
+    if include_llm:
+        print(Panel.fit("[bold cyan]LLM 컴파일러 설치 시작...[/bold cyan]"))
+        install_llm(upgrade_torch=False, pip_index_url=None)
+
     print(Panel.fit("[bold green]모든 단계 완료! 필요 시 upgrade-firmware 명령으로 펌웨어 최신화하세요.[/bold green]"))
 
 # ------------------------------
@@ -167,17 +185,21 @@ def install_llm(upgrade_torch: bool = typer.Option(False, help="PyTorch 2.5.1로
                 pip_index_url: str = typer.Option(None, help="대체 pip index URL (예: 사내 인덱스)")):
     """
     Furiosa-LLM 및 컴파일러 설치:
-      - APT: furiosa-compiler
+      - APT: furiosa-compiler, furiosa-compiler-dev
       - pip: furiosa-llm (+ 선택적으로 torch 2.5.1)
     """
     require_root_notice()
     warn_if_unsupported_os()
     py_ok_for_llm()
 
-    # APT: compiler
-
+    # APT: compiler + dev tools
+    print("[bold]FuriosaAI 컴파일러 및 개발 도구 설치 중...[/bold]")
     run("apt update", sudo=True)
-    run("apt install -y furiosa-compiler", sudo=True)
+    run("apt install -y furiosa-compiler furiosa-compiler-dev", sudo=True)
+
+    # 설치 확인
+    print("[bold]설치된 컴파일러 버전 확인...[/bold]")
+    run("furiosa-compiler --version || echo 'furiosa-compiler 실행 실패'", sudo=False, check=False)
 
     # ---- pip 부트스트랩 (uv venv에는 pip가 없을 수 있음) ----
 
